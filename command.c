@@ -95,7 +95,7 @@ int parseCommandLine(char *line, Command_t *cmd)
  */
 void initializeArgs(Command_t *cmd)
 {
-	const int nmemb = 2;
+	const int nmemb = 8;
 
 	cmd->args = malloc(nmemb * sizeof(char *));
 	if (cmd->args == NULL)
@@ -118,10 +118,16 @@ void extendArgs(Command_t *cmd)
 	const int nmemb_incr = 4;
 	size_t newSize;
 
-	newSize = (cmd->args_size + nmemb_incr) * sizeof(char *);
 	if (cmd->args_count >= cmd->args_size)
 	{
+		newSize = (cmd->args_size + nmemb_incr) * sizeof(char *);
+		/*printf("%ld -> %ld\n",cmd->args_size, newSize);*/
 		cmd->args = realloc(cmd->args, newSize);
+		if (cmd->args == NULL)
+		{
+			perror(cmd->ppathname);
+			exit(EXIT_FAILURE);
+		}
 		cmd->args_size += nmemb_incr;
 	}
 }

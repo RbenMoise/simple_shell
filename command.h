@@ -80,4 +80,6 @@ void initializeArgs(Command_t *cmd);
  */
 void extendArgs(Command_t *cmd);
 
+
+extern char **environ;
 #endif /* COMMAND_H  */
