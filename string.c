@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include "string.h"
+#include "_putchar.h"
+
 
 /**
  * _stpcpy - Copies the string pointed to by src
@@ -15,7 +17,7 @@ char *_stpcpy(char *dest, const char *src)
 	int i;
 
 	i = 0;
-	while(src[i] != '\0')
+	while (src[i] != '\0')
 	{
 		dest[i] = src[i];
 		i++;
@@ -31,6 +33,7 @@ char *_stpcpy(char *dest, const char *src)
  *
  * @s1: The first string.
  * @s2: The second string.
+ * @n: The max length to compare.
  *
  * Return: 0 if the first n char of s1 matches s2
  *         or less than 0 if s1 < s2
@@ -41,8 +44,7 @@ int _strncmp(const char *s1, const char *s2, size_t n)
 	size_t i;
 
 	i = 0;
-	while(s1[i] != '\0' && s2[i] != '\0'
-              && i < n)
+	while (s1[i] != '\0' && s2[i] != '\0' && i < n)
 	{
 		if (s1[i] != s2[i])
 			return (_strlen(s1) - _strlen(s2));
@@ -54,6 +56,7 @@ int _strncmp(const char *s1, const char *s2, size_t n)
 /**
  * _strlen - Returns the lenght of the string
  *           s.
+ * @s: The string to get the length for.
  * Return: size_t, the length of s.
  */
 size_t _strlen(const char *s)
@@ -61,7 +64,7 @@ size_t _strlen(const char *s)
 	int size;
 
 	size = 0;
-	while(s[size] != '\0')
+	while (s[size] != '\0')
 		size++;
 	return (size);
 }
@@ -76,13 +79,26 @@ size_t _strlen(const char *s)
  *
  * Return: A pointer to the resulting string.
  */
-
 char *_strcpy(char *dest, char *src)
 {
-        int i = 0;
+	int i = 0;
 
-        while (src[i] != '\n' && (dest[i] = src[i]) != '\0')
-                i++;
-        return (dest);
+	while (src[i] != '\n' && (dest[i] = src[i]) != '\0')
+		i++;
+	return (dest);
 }
 
+
+/**
+ * _puts - writes the string s and a trailing newline to stdout.
+ * @str: The strign to write.
+ */
+void _puts(const char *str)
+{
+	int i;
+
+	i = 0;
+	while (str[i] != '\0')
+		_putchar(str[i]);
+	_putchar('\n');
+}

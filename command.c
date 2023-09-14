@@ -12,34 +12,32 @@
 #include "getenv.h"
 
 
+/**
+ * parseCommand - Parses command arguments from the arguments
+ *                variables of the main funtion.
+ * @av: A pointer to arguments variables.
+ * @cmd: A poitner to a Command struct.
+ */
 void parseCommand(char **av, Command_t *cmd)
 {
 	int i;
+
 	if (cmd->args_size == 0)
 		initializeArgs(cmd);
 
 	i = 1;
 	cmd->args_count = 0;
-	while(av[i] != NULL)
+	while (av[i] != NULL)
 	{
-		if(cmd->args_count >= cmd->args_size)
-		{
-			cmd->args = realloc(cmd->args, (cmd->args_size + 4) * sizeof(char *));
-			cmd->args_size += 4;
-		}
+		extendArgs(cmd);
 		cmd->args[i - 1] = av[i];
 		i++;
 		cmd->args_count++;
 	}
 
-	if (cmd->args_count >= cmd->args_size)
-        {
-                cmd->args = realloc(cmd->args, (cmd->args_size + 1) * sizeof(char *));
-                cmd->args_size += 1;
-        }
-
-        cmd->args[i] = NULL;
-        cmd->args_count += 1;
+	extendArgs(cmd);
+	cmd->args[i] = NULL;
+	cmd->args_count += 1;
 }
 
 
@@ -49,56 +47,42 @@ void parseCommand(char **av, Command_t *cmd)
  *                    struct pointer.
  *
  * @line: The command input.
+ * @cmd: A pionter to a Command struct.
  *
  * Return: int, -1 if something went wrong otherwise 1;
  */
 int parseCommandLine(char *line, Command_t *cmd)
 {
 	int i;
-	char *token;
-	char cmdPath[50];
-	char tmp[100];
+	char *token, cmdPath[50], tmp[100];
 
 	if (cmd->args_size == 0)
 		initializeArgs(cmd);
-
-        i = 0;
+	i = 0;
 	token = strtok(_strcpy(tmp, line), " ");
 	if (token == NULL)
 		return (-1);
-
 	if (!isExecutable(token, cmdPath))
-        {
-                perror(cmd->ppathname);
-                return (-1);
-        }
-        cmd->args[i++] = cmdPath;
-        cmd->args_count = i;
+	{
+		perror(cmd->ppathname);
+		return (-1);
+	}
+	cmd->args[i++] = cmdPath;
+	cmd->args_count = i;
 
 	/**
-	 * Reset the strtok internal pointer
-	 * to avoid dealing with values from isExecutable
-	 * calls.
+	 * Reset the strtok internal pointer.
 	 */
 	strtok(line, " ");
 	while ((token = strtok(NULL, " ")))
-        {
-                if (cmd->args_count >= cmd->args_size)
-                {
-                        cmd->args = realloc(cmd->args, (cmd->args_size + 4) * sizeof(char *));
-                        cmd->args_size += 4;
-                }
-
-                cmd->args[i++] = token;
-                cmd->args_count++;
-        }
-
-	if (cmd->args_count >= cmd->args_size)
 	{
-		cmd->args = realloc(cmd->args, (cmd->args_size + 1) * sizeof(char *));
-		cmd->args_size += 1;
+		extendArgs(cmd);
+		cmd->args[i++] = token;
+		cmd->args_count++;
 	}
 
+
+	extendArgs(cmd);
 	cmd->args[i] = NULL;
 	cmd->args_count += 1;
 	return (1);
@@ -111,14 +95,35 @@ int parseCommandLine(char *line, Command_t *cmd)
  */
 void initializeArgs(Command_t *cmd)
 {
-	cmd->args = malloc(8 * sizeof(char *));
+	const int nmemb = 2;
+
+	cmd->args = malloc(nmemb * sizeof(char *));
 	if (cmd->args == NULL)
 	{
 		perror(cmd->ppathname);
 		exit(EXIT_FAILURE);
 	}
-	cmd->args_size = 8;
+	cmd->args_size = nmemb;
 	cmd->args_count = 0;
+}
+
+
+/**
+ * extendArgs - If the available memory in the args member is smaller
+ *              or equal to the used memory, increases it by using realloc.
+ * @cmd: A pointer to Command_t struct.
+ */
+void extendArgs(Command_t *cmd)
+{
+	const int nmemb_incr = 4;
+	size_t newSize;
+
+	newSize = (cmd->args_size + nmemb_incr) * sizeof(char *);
+	if (cmd->args_count >= cmd->args_size)
+	{
+		cmd->args = realloc(cmd->args, newSize);
+		cmd->args_size += nmemb_incr;
+	}
 }
 
 
@@ -127,8 +132,8 @@ void initializeArgs(Command_t *cmd)
  *                corresponds to an executable.
  *
  * @commandName: The comamnd name to test against.
- * @filePath: A double pointer to an array holding
- *            the absolute path to the program file.
+ * @filePath: A char array that will contain the absolute path
+ *            to the command file.
  *
  * Return: 1 if comamndName is executable otherwise 0.
  */
@@ -140,28 +145,29 @@ char isExecutable(char *commandName, char filePath[])
 	if (stat(commandName, &st) == 0)
 		return (1);
 	path = _getenv("PATH");
-        if (path != NULL)
-        {
-                dir = strtok(path, ":");
-                while (dir != NULL)
-                {
-                        _filePath = filePath;
-                        _filePath = _stpcpy(_filePath, dir);
-                        _filePath = _stpcpy(_filePath, "/");
-                        _filePath = _stpcpy(_filePath, commandName);
-                        if (stat(filePath, &st) == 0)
-                                return (1);
+	if (path != NULL)
+	{
+		dir = strtok(path, ":");
+		while (dir != NULL)
+		{
+			_filePath = filePath;
+			_filePath = _stpcpy(_filePath, dir);
+			_filePath = _stpcpy(_filePath, "/");
+			_filePath = _stpcpy(_filePath, commandName);
+			if (stat(filePath, &st) == 0)
+				return (1);
 
-                        filePath[0] = '\0';
-                        dir = strtok(NULL, ":");
-                }
-        }
+			filePath[0] = '\0';
+			dir = strtok(NULL, ":");
+		}
+	}
 	return (0);
 }
 
 
 /**
  * executeCommand - Executes a given command.
+ * @cmd: A pointer to Command struct
  */
 void executeCommand(Command_t *cmd)
 {

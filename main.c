@@ -8,7 +8,7 @@
 #include "main.h"
 #include "command.h"
 #include "string.h"
-
+#include "_putchar.h"
 
 /**
  * main - Simple shell entry point.
@@ -91,20 +91,25 @@ int main(int ac, char **argv)
 }
 
 
+
 /**
  * handlePrompt - Handles the command value entered in the
  *                prompt.
+ * Return: A pointer to the line got from the prompt
  */
 char *handlePrompt(void)
 {
 	ssize_t read_len;
 	size_t line_len;
 	char *line;
+	char *msg = "#cisfun$ ";
+
+	while (*msg != '\0')
+		_putchar(*msg++);
 
 	line = NULL;
 	read_len = line_len = 0;
 
-	printf("#cisfun$ ");
 	while ((read_len = getline(&line, &line_len, stdin)) != -1)
 		return (line);
 

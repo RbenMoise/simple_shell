@@ -29,10 +29,19 @@ typedef struct Command_s Command_t;
  *                    and parses and validates it in a command
  *                    struct pointer.
  *
- * @cmd: A double pointer to a Command_t struct.
+ * @line: The command input.
+ * @cmd: A pionter to a Command struct.
+ *
+ * Return: int, -1 if something went wrong otherwise 1;
  */
 int parseCommandLine(char *line, Command_t *cmd);
 
+/**
+ * parseCommand - Parses command arguments from the arguments
+ *                variables of the main funtion.
+ * @av: A pointer to arguments variables.
+ * @cmd: A poitner to a Command struct.
+ */
 void parseCommand(char **av, Command_t *cmd);
 
 
@@ -41,6 +50,8 @@ void parseCommand(char **av, Command_t *cmd);
  *                corresponds to an executable.
  *
  * @commandName: The comamnd name to test against.
+ * @filePath: A char array that will contain the absolute path
+ *            to the command file.
  *
  * Return: 1 if comamndName is executable otherwise 0.
  */
@@ -55,6 +66,18 @@ char isExecutable(char *commandName, char filePath[]);
 void executeCommand(Command_t *cmd);
 
 
+/**
+ * initializeArgs - Allocates memory for the command arguments.
+ * @cmd: A pointer to Command_t struct.
+ */
 void initializeArgs(Command_t *cmd);
+
+
+/**
+ * extendArgs - Increase memory available in the args
+ *              member of cmd, by using realloc.
+ * @cmd: A pointer to Command_t struct.
+ */
+void extendArgs(Command_t *cmd);
 
 #endif /* COMMAND_H  */
