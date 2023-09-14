@@ -24,3 +24,5 @@ After entering your command and arguments, press enter
 to execute it.
 
 # demo
+https://github.com/RbenMoise/simple_shell/assets/81987699/0d8f1031-29d8-4403-ba7a-a18002f0b685
+
